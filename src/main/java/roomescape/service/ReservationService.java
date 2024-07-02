@@ -17,28 +17,30 @@ import roomescape.exception.custom.ExistingReservationException;
 import roomescape.exception.custom.InvalidReservationThemeException;
 import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.exception.custom.PastDateReservationException;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ReservationThemeDao;
-import roomescape.repository.ReservationTimeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationThemeRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationDao reservationDao;
-    private final ReservationTimeDao reservationTimeDao;
-    private final ReservationThemeDao reservationThemeDao;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationThemeRepository reservationThemeRepository;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao,
-                              ReservationThemeDao reservationThemeDao) {
-        this.reservationDao = reservationDao;
-        this.reservationTimeDao = reservationTimeDao;
-        this.reservationThemeDao = reservationThemeDao;
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              ReservationThemeRepository reservationThemeRepository) {
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationThemeRepository = reservationThemeRepository;
     }
 
     public ReservationResponse createReservation(ReservationRequest reservationRequest, LoginMember loginMember) {
         validateReservationCreation(reservationRequest);
 
-        Reservation reservation = reservationDao.save(this.convertToEntity(reservationRequest, loginMember.getName()));
+        Reservation reservation = reservationRepository.save(
+                this.convertToEntity(reservationRequest, loginMember.getName()));
         return this.convertToResponse(reservation);
     }
 
@@ -48,25 +50,26 @@ public class ReservationService {
                 , request.getThemeId());
         validateReservationCreation(reservationRequest);
 
-        Reservation reservation = reservationDao.save(this.convertToEntity(reservationRequest, member.getName()));
+        Reservation reservation = reservationRepository.save(
+                this.convertToEntity(reservationRequest, member.getName()));
         return this.convertToResponse(reservation);
     }
 
     public List<ReservationResponse> findAllReservations() {
-        return reservationDao.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .toList();
     }
 
     public void deleteReservation(Long id) {
-        reservationDao.delete(id);
+        reservationRepository.deleteById(id);
     }
 
     private void validateReservationCreation(ReservationRequest reservationRequest) {
         findReservationThemeById(reservationRequest.getThemeId());
         ReservationTime reservationTime = findReservationTimeById(reservationRequest.getTimeId());
 
-        long count = reservationDao.countByDateAndTimeIdAndThemeId(
+        long count = reservationRepository.countByReservationDateAndTimeIdAndThemeId(
                 reservationRequest.getDate()
                 , reservationRequest.getTimeId()
                 , reservationRequest.getThemeId());
@@ -95,13 +98,13 @@ public class ReservationService {
     }
 
     private ReservationTime findReservationTimeById(Long timeId) {
-        return reservationTimeDao
+        return reservationTimeRepository
                 .findById(timeId)
                 .orElseThrow(InvalidReservationTimeException::new);
     }
 
     private ReservationTheme findReservationThemeById(Long themeId) {
-        return reservationThemeDao
+        return reservationThemeRepository
                 .findById(themeId)
                 .orElseThrow(InvalidReservationThemeException::new);
     }

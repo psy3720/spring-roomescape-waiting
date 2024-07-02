@@ -7,44 +7,45 @@ import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.exception.custom.DuplicateThemeException;
 import roomescape.exception.custom.ReservationThemeConflictException;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ReservationThemeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationThemeRepository;
 
 @Service
 public class ReservationThemeService {
 
-    private final ReservationThemeDao reservationThemeDao;
-    private final ReservationDao reservationDao;
+    private final ReservationThemeRepository reservationThemeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationThemeService(ReservationThemeDao reservationThemeDao, ReservationDao reservationDao) {
-        this.reservationThemeDao = reservationThemeDao;
-        this.reservationDao = reservationDao;
+    public ReservationThemeService(ReservationThemeRepository reservationThemeRepository,
+                                   ReservationRepository reservationRepository) {
+        this.reservationThemeRepository = reservationThemeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationThemeResponse createReservationTheme(ReservationThemeRequest request) {
-        Long count = reservationThemeDao.findByName(request.getName());
+        Long count = reservationThemeRepository.countByName(request.getName());
         if (count > 0) {
             throw new DuplicateThemeException();
         }
 
-        ReservationTheme reservationTheme = reservationThemeDao.save(this.convertToEntity(request));
+        ReservationTheme reservationTheme = reservationThemeRepository.save(this.convertToEntity(request));
         return this.convertToResponse(reservationTheme);
     }
 
     public List<ReservationThemeResponse> findAllReservationThemes() {
-        return reservationThemeDao.findAll()
+        return reservationThemeRepository.findAll()
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
     }
 
     public void deleteReservationTheme(Long id) {
-        long count = reservationDao.countByThemeId(id);
+        long count = reservationRepository.countByThemeId(id);
         if (count > 0) {
             throw new ReservationThemeConflictException();
         }
 
-        reservationThemeDao.delete(id);
+        reservationThemeRepository.deleteById(id);
     }
 
     private ReservationThemeResponse convertToResponse(ReservationTheme reservationTheme) {

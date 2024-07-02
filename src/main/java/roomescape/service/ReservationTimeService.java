@@ -7,47 +7,48 @@ import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.custom.DuplicateTimeException;
 import roomescape.exception.custom.ReservationTimeConflictException;
-import roomescape.repository.ReservationDao;
-import roomescape.repository.ReservationTimeDao;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeDao reservationTimeDao;
-    private final ReservationDao reservationDao;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeDao reservationTimeDao, ReservationDao reservationDao) {
-        this.reservationTimeDao = reservationTimeDao;
-        this.reservationDao = reservationDao;
+    public ReservationTimeService(ReservationTimeRepository reservationTimeDao,
+                                  ReservationRepository reservationRepository) {
+        this.reservationTimeRepository = reservationTimeDao;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationTimeResponse createReservationTime(ReservationTimeRequest reservationTimeRequest) {
-        Long count = reservationTimeDao.findByStartAt(reservationTimeRequest.getStartAt());
+        Long count = reservationTimeRepository.countByStartAt(reservationTimeRequest.getStartAt());
         if (count > 0) {
             throw new DuplicateTimeException();
         }
 
-        ReservationTime reservationTime = reservationTimeDao.save(convertToEntity(reservationTimeRequest));
+        ReservationTime reservationTime = reservationTimeRepository.save(convertToEntity(reservationTimeRequest));
         return this.convertToResponse(reservationTime);
     }
 
     public List<ReservationTimeResponse> findAllReservationTimes() {
-        return reservationTimeDao.findAll()
+        return reservationTimeRepository.findAll()
                 .stream()
                 .map(this::convertToResponse)
                 .toList();
     }
 
     public void deleteReservationTime(Long id) {
-        long count = reservationDao.countByTimeId(id);
+        long count = reservationRepository.countByTimeId(id);
         if (count > 0) {
             throw new ReservationTimeConflictException();
         }
-        reservationTimeDao.delete(id);
+        reservationTimeRepository.deleteById(id);
     }
 
     public List<ReservationTimeResponse> findAllByAvailableTime(String date, Long themeId) {
-        return this.convertToList(reservationTimeDao.findAllByAvailableTime(date, themeId));
+        return this.convertToList(reservationTimeRepository.findAvailableTimes(date, themeId));
     }
 
     private ReservationTimeResponse convertToResponse(ReservationTime reservationTime) {

@@ -18,23 +18,24 @@ import roomescape.exception.custom.PasswordMismatchException;
 import roomescape.exception.custom.RoleNotFoundException;
 import roomescape.exception.custom.TokenNotFoundException;
 import roomescape.exception.custom.UserNotFoundException;
-import roomescape.repository.MemberDao;
-import roomescape.repository.RoleDao;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.RoleRepository;
 import roomescape.util.JwtTokenProvider;
 
 @Service
 public class MemberService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final MemberDao memberDao;
-    private final RoleDao roleDao;
+    private final RoleRepository roleRepository;
+    private final MemberRepository memberRepository;
 
-    public MemberService(JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder, MemberDao memberDao,
-                         RoleDao roleDao) {
+    public MemberService(JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder,
+                         RoleRepository roleRepository,
+                         MemberRepository memberRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
-        this.memberDao = memberDao;
-        this.roleDao = roleDao;
+        this.roleRepository = roleRepository;
+        this.memberRepository = memberRepository;
     }
 
     public String tokenLogin(LoginRequest request) {
@@ -57,17 +58,17 @@ public class MemberService {
     }
 
     public Member findByEmail(String email) {
-        return memberDao.findByEmail(email)
+        return memberRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
     }
 
     public Member findById(Long id) {
-        return memberDao.findById(id)
+        return memberRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);
     }
 
     public List<MemberResponse> findAllMembers() {
-        List<Member> members = memberDao.findAllMembers();
+        List<Member> members = memberRepository.findAll();
         return members.stream()
                 .map(member -> new MemberResponse(member.getId(), member.getName()))
                 .toList();
@@ -91,20 +92,22 @@ public class MemberService {
     public MemberResponse signup(MemberRequest memberRequest) {
         validateSignupInformation(memberRequest);
 
-        Member member = memberDao.save(this.convertToEntity(memberRequest));
+        Member member = memberRepository.save(this.convertToEntity(memberRequest));
 
         return this.convertToResponse(member);
     }
 
     private void validateSignupInformation(MemberRequest memberRequest) {
-        if (memberDao.findByEmail(memberRequest.getEmail()).isPresent()) {
+        if (memberRepository.findByEmail(memberRequest.getEmail()).isPresent()) {
             throw new DuplicateMemberException();
         }
     }
 
     private Member convertToEntity(MemberRequest request) {
         String password = passwordEncoder.encode(request.getPassword());
-        Role role = roleDao.findByName(RoleType.MEMBER.name())
+
+        Role role = roleRepository
+                .findByName(RoleType.MEMBER)
                 .orElseThrow(() -> new RoleNotFoundException());
 
         return new Member(request.getName(), request.getEmail(), password, role);

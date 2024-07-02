@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -18,9 +19,11 @@ public class Reservation {
     private String reservationDate;
 
     @ManyToOne
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private ReservationTheme theme;
 
     public Reservation() {
