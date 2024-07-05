@@ -13,4 +13,6 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     long countByThemeId(Long id);
 
     long countByTimeId(Long id);
+
+    List<Reservation> findAllByName(String name);
 }

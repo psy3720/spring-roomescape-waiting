@@ -16,6 +16,8 @@ public class Reservation {
 
     private String name;
 
+    private Long memberId;
+
     private String reservationDate;
 
     @ManyToOne
@@ -26,22 +28,29 @@ public class Reservation {
     @JoinColumn(name = "theme_id")
     private ReservationTheme theme;
 
+    private String status;
+
     public Reservation() {
     }
 
-    public Reservation(Long id, String name, String reservationDate, ReservationTime time, ReservationTheme theme) {
+    public Reservation(Long id, String name, String reservationDate, ReservationTime time, ReservationTheme theme,
+                       String status) {
         this.id = id;
         this.name = name;
         this.reservationDate = reservationDate;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
-    public Reservation(String name, String reservationDate, ReservationTime time, ReservationTheme theme) {
+    public Reservation(String name, Long memberId, String reservationDate, ReservationTime time, ReservationTheme theme,
+                       String status) {
         this.name = name;
+        this.memberId = memberId;
         this.reservationDate = reservationDate;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
 
@@ -65,11 +74,20 @@ public class Reservation {
         return theme;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public Long getMemberId() {
+        return memberId;
+    }
+
     public Reservation toEntity(Reservation reservation, Long id) {
         return new Reservation(id
                 , reservation.getName()
                 , reservation.getReservationDate()
                 , reservation.getTime()
-                , reservation.getTheme());
+                , reservation.getTheme()
+                , reservation.getStatus());
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotations.ValidationSequence;
 import roomescape.domain.LoginMember;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
@@ -49,5 +50,13 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(@PathVariable(value = "id") Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<ReservationMineResponse>> reservationMine(LoginMember loginMember) {
+        List<ReservationMineResponse> reservationMineResponses = reservationService.reservationMine(
+                loginMember.getName());
+
+        return ResponseEntity.ok(reservationMineResponses);
     }
 }

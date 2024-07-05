@@ -37,14 +37,22 @@ public class ReservationTest {
     void init() {
         Map<String, Object> params = new HashMap<>();
         params.put("startAt", "15:40");
+        예약시간을_생성한다(params);
 
+        params.clear();
+        params.put("startAt", "16:40");
         예약시간을_생성한다(params);
 
         params.clear();
         params.put("name", "레벨2 탈출");
         params.put("description", "우테코 레벨2를 탈출하는 내용입니다.");
         params.put("thumbnail", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
+        예약테마를_생성한다(params);
 
+        params.clear();
+        params.put("name", "레벨3 탈출");
+        params.put("description", "우테코 레벨3를 탈출하는 내용입니다.");
+        params.put("thumbnail", "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg");
         예약테마를_생성한다(params);
 
         회원가입(EMAIL, PASSWORD, NAME);
@@ -228,5 +236,50 @@ public class ReservationTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(0));
+    }
+
+    @Test
+    @DisplayName("내 예약 목록을 조회한다.")
+    void findAllReservationMine() {
+        String email = "test1@email.com";
+        회원가입(email, PASSWORD, "테스트유저");
+        Response response = 로그인(email, PASSWORD);
+        String testToken = response.getCookie("token");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", DateFixture.formatDate("yyyy-MM-dd", 1));
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .cookie("token", token)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value())
+                .body("id", is(1));
+
+        params.clear();
+        params.put("date", DateFixture.formatDate("yyyy-MM-dd", 1));
+        params.put("timeId", 2L);
+        params.put("themeId", 2L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .cookie("token", testToken)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value())
+                .body("id", is(2));
+
+        RestAssured.given().log().all()
+                .when()
+                .cookie("token", token)
+                .get("/reservations/mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", is(1));
     }
 }
