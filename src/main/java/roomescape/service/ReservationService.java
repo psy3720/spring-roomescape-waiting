@@ -12,6 +12,7 @@ import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.request.ReservationAdminRequest;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.custom.ExistingReservationException;
 import roomescape.exception.custom.InvalidReservationThemeException;
@@ -27,20 +28,24 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationThemeRepository reservationThemeRepository;
+    private final MemberService memberService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              ReservationThemeRepository reservationThemeRepository) {
+                              ReservationThemeRepository reservationThemeRepository, MemberService memberService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationThemeRepository = reservationThemeRepository;
+        this.memberService = memberService;
     }
 
     public ReservationResponse createReservation(ReservationRequest reservationRequest, LoginMember loginMember) {
         validateReservationCreation(reservationRequest);
 
+        Member findMember = memberService.findByEmail(loginMember.getEmail());
+
         Reservation reservation = reservationRepository.save(
-                this.convertToEntity(reservationRequest, loginMember.getName()));
+                this.convertToEntity(reservationRequest, findMember));
         return this.convertToResponse(reservation);
     }
 
@@ -51,7 +56,7 @@ public class ReservationService {
         validateReservationCreation(reservationRequest);
 
         Reservation reservation = reservationRepository.save(
-                this.convertToEntity(reservationRequest, member.getName()));
+                this.convertToEntity(reservationRequest, member));
         return this.convertToResponse(reservation);
     }
 
@@ -87,14 +92,16 @@ public class ReservationService {
                 reservation.getTime().getStartAt(), reservation.getTheme().getName());
     }
 
-    private Reservation convertToEntity(ReservationRequest reservationRequest, String name) {
+    private Reservation convertToEntity(ReservationRequest reservationRequest, Member member) {
         ReservationTime reservationTime = findReservationTimeById(reservationRequest.getTimeId());
         ReservationTheme reservationTheme = findReservationThemeById(reservationRequest.getThemeId());
 
-        return new Reservation(name
+        return new Reservation(member.getName()
+                , member.getId()
                 , reservationRequest.getDate()
                 , reservationTime
-                , reservationTheme);
+                , reservationTheme
+                , "예약");
     }
 
     private ReservationTime findReservationTimeById(Long timeId) {
@@ -114,5 +121,22 @@ public class ReservationService {
         LocalDateTime reservationDateTime = LocalDateTime.of(LocalDate.parse(date), LocalTime.parse(startAt));
 
         return reservationDateTime.isBefore(now);
+    }
+
+    public List<ReservationMineResponse> reservationMine(String name) {
+        return reservationRepository.findAllByName(name)
+                .stream()
+                .map(this::convertToReservationMineResponse)
+                .toList();
+    }
+
+    private ReservationMineResponse convertToReservationMineResponse(Reservation reservation) {
+        return new ReservationMineResponse(
+                reservation.getId()
+                , reservation.getTheme().getName()
+                , reservation.getReservationDate()
+                , reservation.getTime().getStartAt()
+                , reservation.getStatus()
+        );
     }
 }
