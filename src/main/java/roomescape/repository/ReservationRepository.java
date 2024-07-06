@@ -14,5 +14,5 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     long countByTimeId(Long id);
 
-    List<Reservation> findAllById(Long memberId);
+    List<Reservation> findAllByMemberId(Long memberId);
 }

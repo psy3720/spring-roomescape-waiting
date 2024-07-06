@@ -48,7 +48,14 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeResponse> findAllByAvailableTime(String date, Long themeId) {
-        return this.convertToList(reservationTimeRepository.findAvailableTimes(date, themeId));
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> availableTimes = reservationTimeRepository.findAvailableTimes(date, themeId);
+
+        return this.convertToList(availableTimes, reservationTimes);
+    }
+
+    private ReservationTimeResponse convertToResponse(ReservationTime reservationTime, boolean alreadyBooked) {
+        return new ReservationTimeResponse(reservationTime.getId(), reservationTime.getStartAt(), alreadyBooked);
     }
 
     private ReservationTimeResponse convertToResponse(ReservationTime reservationTime) {
@@ -59,7 +66,14 @@ public class ReservationTimeService {
         return new ReservationTime(reservationTimeRequest.getStartAt());
     }
 
-    private List<ReservationTimeResponse> convertToList(List<ReservationTime> reservationTimes) {
-        return reservationTimes.stream().map(this::convertToResponse).toList();
+    private List<ReservationTimeResponse> convertToList(List<ReservationTime> availableTimes
+            , List<ReservationTime> reservationTimes) {
+
+        return reservationTimes.stream().map(
+                reservationTime -> {
+                    boolean alreadyBooked = !availableTimes.contains(reservationTime);
+                    return this.convertToResponse(reservationTime, alreadyBooked);
+                }
+        ).toList();
     }
 }

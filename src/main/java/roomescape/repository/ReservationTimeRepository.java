@@ -13,7 +13,8 @@ public interface ReservationTimeRepository extends CrudRepository<ReservationTim
     Long countByStartAt(String startAt);
 
     @Query(value = """ 
-            SELECT rt.* FROM reservation_time rt
+            SELECT rt.*
+            FROM reservation_time rt
             WHERE NOT EXISTS (
                 SELECT 1 FROM reservation r 
                 WHERE r.reservation_date = :reservationDate

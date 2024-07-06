@@ -125,7 +125,7 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> reservationMine(Long memberId) {
-        return reservationRepository.findAllById(memberId)
+        return reservationRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(this::convertToReservationMineResponse)
                 .toList();
