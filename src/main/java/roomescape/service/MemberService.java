@@ -39,16 +39,14 @@ public class MemberService {
     }
 
     public String tokenLogin(LoginRequest request) {
-        String email = request.getEmail();
         Member member = findByEmail(request.getEmail());
-
         validateMemberCredentials(member, request.getPassword());
 
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("name", member.getName());
         extraClaims.put("role", member.getRole().getName());
 
-        return jwtTokenProvider.createToken(email, extraClaims);
+        return jwtTokenProvider.createToken(String.valueOf(member.getId()), extraClaims);
     }
 
     private void validateMemberCredentials(Member member, String password) {
@@ -77,8 +75,8 @@ public class MemberService {
     public LoginResponse loginCheck(String token) {
         validateToken(token);
 
-        String email = jwtTokenProvider.getSubject(token);
-        Member member = findByEmail(email);
+        Long memberId = Long.parseLong(jwtTokenProvider.getSubject(token));
+        Member member = findById(memberId);
 
         return new LoginResponse(member.getName());
     }

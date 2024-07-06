@@ -14,8 +14,6 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
     private Long memberId;
 
     private String reservationDate;
@@ -33,33 +31,17 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(Long id, String name, String reservationDate, ReservationTime time, ReservationTheme theme,
-                       String status) {
-        this.id = id;
-        this.name = name;
+    public Reservation(String reservationDate, ReservationTime time, ReservationTheme theme,
+                       String status, Long memberId) {
         this.reservationDate = reservationDate;
         this.time = time;
         this.theme = theme;
         this.status = status;
-    }
-
-    public Reservation(String name, Long memberId, String reservationDate, ReservationTime time, ReservationTheme theme,
-                       String status) {
-        this.name = name;
         this.memberId = memberId;
-        this.reservationDate = reservationDate;
-        this.time = time;
-        this.theme = theme;
-        this.status = status;
     }
-
 
     public Long getId() {
         return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getReservationDate() {
@@ -80,14 +62,5 @@ public class Reservation {
 
     public Long getMemberId() {
         return memberId;
-    }
-
-    public Reservation toEntity(Reservation reservation, Long id) {
-        return new Reservation(id
-                , reservation.getName()
-                , reservation.getReservationDate()
-                , reservation.getTime()
-                , reservation.getTheme()
-                , reservation.getStatus());
     }
 }

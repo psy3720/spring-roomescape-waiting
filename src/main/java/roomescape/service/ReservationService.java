@@ -42,7 +42,7 @@ public class ReservationService {
     public ReservationResponse createReservation(ReservationRequest reservationRequest, LoginMember loginMember) {
         validateReservationCreation(reservationRequest);
 
-        Member findMember = memberService.findByEmail(loginMember.getEmail());
+        Member findMember = memberService.findById(loginMember.getId());
 
         Reservation reservation = reservationRepository.save(
                 this.convertToEntity(reservationRequest, findMember));
@@ -88,7 +88,9 @@ public class ReservationService {
     }
 
     private ReservationResponse convertToResponse(Reservation reservation) {
-        return new ReservationResponse(reservation.getId(), reservation.getName(), reservation.getReservationDate(),
+        Member findMember = memberService.findById(reservation.getMemberId());
+
+        return new ReservationResponse(reservation.getId(), findMember.getName(), reservation.getReservationDate(),
                 reservation.getTime().getStartAt(), reservation.getTheme().getName());
     }
 
@@ -96,12 +98,11 @@ public class ReservationService {
         ReservationTime reservationTime = findReservationTimeById(reservationRequest.getTimeId());
         ReservationTheme reservationTheme = findReservationThemeById(reservationRequest.getThemeId());
 
-        return new Reservation(member.getName()
-                , member.getId()
-                , reservationRequest.getDate()
+        return new Reservation(reservationRequest.getDate()
                 , reservationTime
                 , reservationTheme
-                , "예약");
+                , "예약"
+                , member.getId());
     }
 
     private ReservationTime findReservationTimeById(Long timeId) {
@@ -123,8 +124,8 @@ public class ReservationService {
         return reservationDateTime.isBefore(now);
     }
 
-    public List<ReservationMineResponse> reservationMine(String name) {
-        return reservationRepository.findAllByName(name)
+    public List<ReservationMineResponse> reservationMine(Long memberId) {
+        return reservationRepository.findAllById(memberId)
                 .stream()
                 .map(this::convertToReservationMineResponse)
                 .toList();

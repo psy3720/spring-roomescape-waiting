@@ -55,7 +55,7 @@ public class ReservationController {
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> reservationMine(LoginMember loginMember) {
         List<ReservationMineResponse> reservationMineResponses = reservationService.reservationMine(
-                loginMember.getName());
+                loginMember.getId());
 
         return ResponseEntity.ok(reservationMineResponses);
     }
