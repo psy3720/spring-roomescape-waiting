@@ -63,6 +63,13 @@ public class ReservationController {
         return ResponseEntity.ok(reservationMineResponses);
     }
 
+    @DeleteMapping("/mine/{id}")
+    public ResponseEntity<Void> reservationMineDelete(LoginMember loginMember, @PathVariable("id") Long waitingId) {
+        reservationService.reservationMineDelete(waitingId);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/waiting")
     public ResponseEntity<WaitingResponse> reservationWaiting(@RequestBody @Valid ReservationWaitingRequest request,
                                                               LoginMember loginMember) {

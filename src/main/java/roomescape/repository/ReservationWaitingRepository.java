@@ -8,7 +8,6 @@ import roomescape.domain.Waiting;
 import roomescape.dto.response.WaitingWithRank;
 
 public interface ReservationWaitingRepository extends CrudRepository<Waiting, Long> {
-    List<Waiting> findAllByMemberId(Long memberId);
 
     @Query("SELECT new roomescape.dto.response.WaitingWithRank(" +
             "    w, " +
@@ -21,4 +20,6 @@ public interface ReservationWaitingRepository extends CrudRepository<Waiting, Lo
             "FROM Waiting w " +
             "WHERE w.memberId = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(@Param("memberId") Long memberId);
+
+    void deleteByIdAndMemberId(Long waitingId, Long id);
 }

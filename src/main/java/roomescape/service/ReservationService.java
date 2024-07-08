@@ -195,4 +195,8 @@ public class ReservationService {
                 , waiting.getThemeId()
                 , waiting.getTimeId());
     }
+
+    public void reservationMineDelete(Long waitingId) {
+        reservationWaitingRepository.deleteById(waitingId);
+    }
 }
