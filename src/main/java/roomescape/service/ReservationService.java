@@ -4,16 +4,22 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationType;
+import roomescape.domain.Waiting;
 import roomescape.dto.request.ReservationAdminRequest;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.ReservationWaitingRequest;
 import roomescape.dto.response.ReservationMineResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.WaitingResponse;
+import roomescape.dto.response.WaitingWithRank;
 import roomescape.exception.custom.ExistingReservationException;
 import roomescape.exception.custom.InvalidReservationThemeException;
 import roomescape.exception.custom.InvalidReservationTimeException;
@@ -21,6 +27,7 @@ import roomescape.exception.custom.PastDateReservationException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationThemeRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 
 @Service
 public class ReservationService {
@@ -29,14 +36,17 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationThemeRepository reservationThemeRepository;
     private final MemberService memberService;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              ReservationThemeRepository reservationThemeRepository, MemberService memberService) {
+                              ReservationThemeRepository reservationThemeRepository, MemberService memberService,
+                              ReservationWaitingRepository reservationWaitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationThemeRepository = reservationThemeRepository;
         this.memberService = memberService;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     public ReservationResponse createReservation(ReservationRequest reservationRequest, LoginMember loginMember) {
@@ -101,7 +111,7 @@ public class ReservationService {
         return new Reservation(reservationRequest.getDate()
                 , reservationTime
                 , reservationTheme
-                , "예약"
+                , ReservationType.RESERVED.getName()
                 , member.getId());
     }
 
@@ -125,10 +135,36 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> reservationMine(Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId)
+        List<ReservationMineResponse> reservationMineResponses = reservationRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(this::convertToReservationMineResponse)
-                .toList();
+                .collect(Collectors.toList());
+
+        List<ReservationMineResponse> reservationMineWaitingResponses = reservationWaitingRepository.findWaitingsWithRankByMemberId(
+                        memberId)
+                .stream()
+                .map(this::convertToReservationMineWaitingResponse)
+                .collect(Collectors.toList());
+
+        reservationMineResponses.addAll(reservationMineWaitingResponses);
+
+        return reservationMineResponses;
+    }
+
+    private ReservationMineResponse convertToReservationMineWaitingResponse(WaitingWithRank waitingWithRank) {
+        Waiting waiting = waitingWithRank.getWaiting();
+
+        ReservationTheme theme = findReservationThemeById(waiting.getThemeId());
+        ReservationTime time = findReservationTimeById(waiting.getTimeId());
+
+        return new ReservationMineResponse(
+                waiting.getId()
+                , theme.getName()
+                , waiting.getDate()
+                , time.getStartAt()
+                , ReservationType.WAITING.getName()
+                , waitingWithRank.getRank()
+        );
     }
 
     private ReservationMineResponse convertToReservationMineResponse(Reservation reservation) {
@@ -139,5 +175,24 @@ public class ReservationService {
                 , reservation.getTime().getStartAt()
                 , reservation.getStatus()
         );
+    }
+
+    public WaitingResponse createReservationWaiting(ReservationWaitingRequest request, Long memberId) {
+        Waiting waiting = reservationWaitingRepository.save(convertToWaiting(request, memberId));
+        return convertToWaitingResponse(waiting);
+    }
+
+    public Waiting convertToWaiting(ReservationWaitingRequest request, Long memberId) {
+        return new Waiting(request.getDate()
+                , request.getThemeId()
+                , request.getTimeId()
+                , memberId);
+    }
+
+    public WaitingResponse convertToWaitingResponse(Waiting waiting) {
+        return new WaitingResponse(waiting.getId()
+                , waiting.getDate()
+                , waiting.getThemeId()
+                , waiting.getTimeId());
     }
 }
