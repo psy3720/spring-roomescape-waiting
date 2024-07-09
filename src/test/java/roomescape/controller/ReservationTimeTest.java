@@ -190,6 +190,7 @@ public class ReservationTimeTest {
         예약을_생성한다(params, token);
 
         RestAssured.given().log().all()
+                .cookie("token", token)
                 .contentType(ContentType.JSON)
                 .when().get("/times/available?date=" + date + "&themeId=1")
                 .then().log().all()
