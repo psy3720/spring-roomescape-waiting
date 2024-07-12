@@ -5,7 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity(name = "theme")
+@Entity
 public class ReservationTheme {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -23,11 +23,11 @@ import roomescape.exception.custom.DuplicateTimeException;
 import roomescape.exception.custom.ReservationTimeConflictException;
 import roomescape.fixture.DateFixture;
 
-@Sql("classpath:table_init.sql")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+//@Sql("classpath:table_init.sql")
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @DisplayName("예약시간 테스트")
-public class ReservationTimeTest {
+public class ReservationTimeTest extends DefaultTestBase {
 
     private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";

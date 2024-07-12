@@ -24,10 +24,10 @@ import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.exception.custom.PastDateReservationException;
 import roomescape.fixture.DateFixture;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @DisplayName("예약 테스트")
-public class ReservationTest {
+public class ReservationTest extends DefaultTestBase {
     private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
     private static final String NAME = "테스트";

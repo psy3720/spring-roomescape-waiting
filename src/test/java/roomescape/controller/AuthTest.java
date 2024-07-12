@@ -1,26 +1,22 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
-import static roomescape.fixture.AuthFixture.로그인;
-import static roomescape.fixture.MemberFixture.회원가입;
-
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.request.LoginRequest;
 import roomescape.exception.custom.PasswordMismatchException;
 import roomescape.exception.custom.TokenNotFoundException;
 
+import static org.hamcrest.Matchers.is;
+import static roomescape.fixture.AuthFixture.로그인;
+import static roomescape.fixture.MemberFixture.회원가입;
+
 @DisplayName("인증 및 인가 관련 테스트")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class AuthTest {
+public class AuthTest extends DefaultTestBase {
     private static final String MEMBER_EMAIL = "test@email.com";
     private static final String ADMIN_EMAIL = "admin@email.com";
     private static final String PASSWORD = "1234";
@@ -30,6 +26,7 @@ public class AuthTest {
     @BeforeEach
     void init() {
         회원가입(MEMBER_EMAIL, PASSWORD, NAME);
+        회원가입(ADMIN_EMAIL, PASSWORD, NAME);
     }
 
     @DisplayName("[로그인] - 유효한 자격 증명으로 로그인하여 토큰을 획득한다.")

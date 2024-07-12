@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
@@ -9,6 +10,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.LoginMember;
+import roomescape.domain.RoleType;
 import roomescape.util.CookieUtils;
 import roomescape.util.JwtTokenProvider;
 
@@ -35,6 +37,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         String token = CookieUtils.extractCookieValue(cookies, TOKEN);
         Long memberId = Long.parseLong(jwtTokenProvider.getSubject(token));
 
-        return new LoginMember(memberId);
+        Claims body = jwtTokenProvider.getClaimsFromToken(token);
+        RoleType role = RoleType.fromName(String.valueOf(body.get("role")));
+
+        return new LoginMember(memberId, role);
     }
 }

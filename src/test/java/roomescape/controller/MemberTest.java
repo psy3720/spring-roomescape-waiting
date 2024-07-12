@@ -1,24 +1,19 @@
 package roomescape.controller;
 
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import roomescape.exception.custom.DuplicateMemberException;
+
 import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.MemberFixture.회원가입;
 
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.exception.custom.DuplicateMemberException;
-
-@Sql("classpath:table_init.sql")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @DisplayName("사용자 테스트")
-public class MemberTest {
+public class MemberTest extends DefaultTestBase {
 
     private static final int DEFAULT_ACCOUNT_SIZE = 2;
     private static final String EMAIL = "test@email.com";
@@ -71,6 +66,6 @@ public class MemberTest {
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .when().get("/members")
                 .then().log().all()
-                .body("size()", is(5 + DEFAULT_ACCOUNT_SIZE));
+                .body("size()", is(6));
     }
 }

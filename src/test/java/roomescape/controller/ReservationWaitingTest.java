@@ -22,11 +22,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.fixture.DateFixture;
 
-@Sql("classpath:table_init.sql")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+//@Sql("classpath:table_init.sql")
+//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @DisplayName("예약대기 테스트")
-public class ReservationWaitingTest {
+public class ReservationWaitingTest extends DefaultTestBase {
     private static final String EMAIL = "test@email.com";
     private static final String PASSWORD = "1234";
     private static final String NAME = "테스트";

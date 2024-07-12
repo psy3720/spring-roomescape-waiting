@@ -1,5 +1,20 @@
 package roomescape.controller;
 
+import io.restassured.response.Response;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.fixture.DateFixture;
+import roomescape.repository.MemberRepository;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.AuthFixture.로그인;
 import static roomescape.fixture.MemberFixture.회원가입;
@@ -7,24 +22,9 @@ import static roomescape.fixture.ReservationFixture.예약을_생성한다_관�
 import static roomescape.fixture.ReservationThemeFixture.예약테마를_생성한다;
 import static roomescape.fixture.ReservationTimeFixture.예약시간을_생성한다;
 
-import io.restassured.response.Response;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.fixture.DateFixture;
-
-@Sql("classpath:table_init.sql")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @DisplayName("관리자 예약 테스트")
-public class ReservationAdminTest {
-    private static final String EMAIL = "admin@email.com";
+public class ReservationAdminTest extends DefaultTestBase {
+    private static final String ADMIN_EMAIL = "admin@email.com";
     private static final String PASSWORD = "1234";
     private static final String NAME = "관리자";
     private String token;
@@ -43,9 +43,9 @@ public class ReservationAdminTest {
 
         예약테마를_생성한다(params);
 
-        회원가입(EMAIL, PASSWORD, NAME);
+        회원가입(ADMIN_EMAIL, PASSWORD, NAME);
 
-        Response response = 로그인(EMAIL, PASSWORD);
+        Response response = 로그인(ADMIN_EMAIL, PASSWORD);
         token = response.getCookie("token");
     }
 
