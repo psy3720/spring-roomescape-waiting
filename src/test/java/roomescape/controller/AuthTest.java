@@ -26,7 +26,6 @@ public class AuthTest extends DefaultTestBase {
     @BeforeEach
     void init() {
         회원가입(MEMBER_EMAIL, PASSWORD, NAME);
-        회원가입(ADMIN_EMAIL, PASSWORD, NAME);
     }
 
     @DisplayName("[로그인] - 유효한 자격 증명으로 로그인하여 토큰을 획득한다.")

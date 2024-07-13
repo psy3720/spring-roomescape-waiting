@@ -43,8 +43,6 @@ public class ReservationAdminTest extends DefaultTestBase {
 
         예약테마를_생성한다(params);
 
-        회원가입(ADMIN_EMAIL, PASSWORD, NAME);
-
         Response response = 로그인(ADMIN_EMAIL, PASSWORD);
         token = response.getCookie("token");
     }
