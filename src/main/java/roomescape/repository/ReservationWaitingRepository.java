@@ -21,5 +21,4 @@ public interface ReservationWaitingRepository extends CrudRepository<Waiting, Lo
             "WHERE w.memberId = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(@Param("memberId") Long memberId);
 
-    void deleteByIdAndMemberId(Long waitingId, Long id);
 }
