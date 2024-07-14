@@ -6,6 +6,7 @@ import static roomescape.fixture.MemberFixture.회원가입;
 import static roomescape.fixture.ReservationFixture.예약을_생성한다;
 import static roomescape.fixture.ReservationThemeFixture.예약테마를_생성한다;
 import static roomescape.fixture.ReservationTimeFixture.예약시간을_생성한다;
+import static roomescape.fixture.ReservationWaitingFixture.예약대기를_생성한다;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -18,14 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.ReservationType;
 import roomescape.exception.custom.ExistingReservationException;
 import roomescape.exception.custom.InvalidReservationThemeException;
 import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.exception.custom.PastDateReservationException;
 import roomescape.fixture.DateFixture;
 
-//@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-//@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @DisplayName("예약 테스트")
 public class ReservationTest extends DefaultTestBase {
     private static final String EMAIL = "test@email.com";
@@ -281,5 +281,42 @@ public class ReservationTest extends DefaultTestBase {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(1));
+    }
+
+    @DisplayName("예약 취소 시 만약 예약대기가 있는 경우 가장 빠른 순번으로 예약된다.")
+    @Test
+    void deleteReservationWaiting() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", DateFixture.formatDate("yyyy-MM-dd", 1));
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+
+        예약을_생성한다(params, token);
+
+        String email = "test2@email.com";
+        회원가입(email, "1234", "회원1");
+        Response response = 로그인(EMAIL, PASSWORD);
+        String otherMemberToken = response.getCookie("token");
+
+        params.clear();
+        params.put("date", DateFixture.formatDate("yyyy-MM-dd", 1));
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+
+        예약대기를_생성한다(params, otherMemberToken);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        RestAssured.given().log().all()
+                .when()
+                .cookie("token", otherMemberToken)
+                .get("/reservations/mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", is(1))
+                .body("get(0).status", is(ReservationType.RESERVED.getName()));
     }
 }

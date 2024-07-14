@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -76,8 +77,20 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
+
+        Waiting waiting = reservationWaitingRepository.findFirstByOrderByIdAsc();
+        if (waiting != null) {
+            ReservationTime reservationTime = findReservationTimeById(waiting.getTimeId());
+            ReservationTheme reservationTheme = findReservationThemeById(waiting.getThemeId());
+            reservationRepository.save(new Reservation(waiting.getDate(), reservationTime, reservationTheme
+                    , ReservationType.RESERVED.getName()
+                    , waiting.getMemberId()));
+
+            reservationWaitingRepository.delete(waiting);
+        }
     }
 
     private void validateReservationCreation(ReservationRequest reservationRequest) {

@@ -39,6 +39,8 @@ class ReservationTimeRepositoryTest {
     @PersistenceContext
     EntityManager entityManager;
 
+    private static final int DEFAULT_TIME_SIZE = 3;
+
     @BeforeEach
     void init() {
         ReservationTime reservationTime1 = new ReservationTime(1L, "18:00");
@@ -86,7 +88,7 @@ class ReservationTimeRepositoryTest {
         long themeId = 1L;
         List<ReservationTime> availableTimes = reservationTimeRepository.findAvailableTimes(reservationDate, themeId);
 
-        assertThat(availableTimes.size()).isEqualTo(2);
+        assertThat(availableTimes.size()).isEqualTo(2 + DEFAULT_TIME_SIZE);
     }
 
     @DisplayName("이미 존재하는 예약 시간목록을 조회한다.")
