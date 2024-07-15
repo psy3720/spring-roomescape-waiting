@@ -1,10 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.LoginMember;
@@ -29,6 +24,12 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationThemeRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -83,9 +84,7 @@ public class ReservationService {
 
         Waiting waiting = reservationWaitingRepository.findFirstByOrderByIdAsc();
         if (waiting != null) {
-            ReservationTime reservationTime = findReservationTimeById(waiting.getTimeId());
-            ReservationTheme reservationTheme = findReservationThemeById(waiting.getThemeId());
-            reservationRepository.save(new Reservation(waiting.getDate(), reservationTime, reservationTheme
+            reservationRepository.save(new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme()
                     , ReservationType.RESERVED.getName()
                     , waiting.getMemberId()));
 
@@ -167,8 +166,8 @@ public class ReservationService {
     private ReservationMineResponse convertToReservationMineWaitingResponse(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.getWaiting();
 
-        ReservationTheme theme = findReservationThemeById(waiting.getThemeId());
-        ReservationTime time = findReservationTimeById(waiting.getTimeId());
+        ReservationTheme theme = findReservationThemeById(waiting.getTheme().getId());
+        ReservationTime time = findReservationTimeById(waiting.getTime().getId());
 
         return new ReservationMineResponse(
                 waiting.getId()
@@ -196,17 +195,20 @@ public class ReservationService {
     }
 
     public Waiting convertToWaiting(ReservationWaitingRequest request, Long memberId) {
+        ReservationTheme theme = findReservationThemeById(request.getThemeId());
+        ReservationTime time = findReservationTimeById(request.getTimeId());
+
         return new Waiting(request.getDate()
-                , request.getThemeId()
-                , request.getTimeId()
+                , theme
+                , time
                 , memberId);
     }
 
     public WaitingResponse convertToWaitingResponse(Waiting waiting) {
         return new WaitingResponse(waiting.getId()
                 , waiting.getDate()
-                , waiting.getThemeId()
-                , waiting.getTimeId());
+                , waiting.getTheme().getId()
+                , waiting.getTime().getId());
     }
 
     public void reservationMineDelete(Long waitingId) {

@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Waiting {
@@ -14,19 +15,21 @@ public class Waiting {
 
     String date;
 
-    Long themeId;
+    @ManyToOne
+    ReservationTheme theme;
 
-    Long timeId;
+    @ManyToOne
+    ReservationTime time;
 
     Long memberId;
 
     public Waiting() {
     }
 
-    public Waiting(String date, Long themeId, Long timeId, Long memberId) {
+    public Waiting(String date, ReservationTheme theme, ReservationTime time, Long memberId) {
         this.date = date;
-        this.themeId = themeId;
-        this.timeId = timeId;
+        this.theme = theme;
+        this.time = time;
         this.memberId = memberId;
     }
 
@@ -38,12 +41,12 @@ public class Waiting {
         return date;
     }
 
-    public Long getThemeId() {
-        return themeId;
+    public ReservationTheme getTheme() {
+        return theme;
     }
 
-    public Long getTimeId() {
-        return timeId;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Long getMemberId() {

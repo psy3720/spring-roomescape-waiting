@@ -1,10 +1,7 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +14,10 @@ import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationType;
 import roomescape.domain.Waiting;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ReservationTimeRepositoryTest {
@@ -71,7 +72,7 @@ class ReservationTimeRepositoryTest {
                 , 1L);
         reservationRepository.save(reservation);
 
-        Waiting waiting = new Waiting("2025-07-14", 1L, 1L, 2L);
+        Waiting waiting = new Waiting("2025-07-14", reservationTheme1, reservationTime1, 2L);
         reservationWaitingRepository.save(waiting);
     }
 
